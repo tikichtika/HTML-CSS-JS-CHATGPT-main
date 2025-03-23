@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <title>LA TULIPE NOIR Chatbot</title>
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #716d6d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Chat container */
+        .chat-container {
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.742);
+            border-radius: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.774);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(to bottom, transparent, #000000);
+            color: rgb(255, 255, 255);
+            border-bottom: 1px solid #444;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            letter-spacing: 2px;
+            font-family: serif;
+        }
+
+        .chat-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #000000;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            background: #e8d0a7;
+            color: rgb(0, 0, 0);
+            margin-left: auto;
+            width: fit-content;
+            border-radius: 10px 10px 0 10px;
+        }
+
+        .message-container {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between the image and message */
+        }
+
+        .bot-image {
+            width: 40px; /* Adjust size */
+            height: 40px;
+            background-image: url('Untitled design.png'); /* Replace with your bot image */
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            flex-shrink: 0; /* Prevents shrinking */
+        }
+
+        .bot-message {
+            background: #333;
+            color: white;
+            width: fit-content;
+            padding: 10px;
+            border-radius: 10px 10px 10px 0;
+            font-family: serif;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #000000;
+        }
+
+        input {
+            flex: 1;
+            box-shadow: 0em 1em 3em #e8d0a7;
+            padding: 10px;
+            border: 1px solid #3a3838;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            background: #000000;
+            color: white;
+        }
+
+        .send-icon {
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            ;
+            transition: color 0.3s;
+           
+        }
+
+        .send-icon:hover {
+            color: #d4b88a;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            font-size: 24px;
+            color: #e8d0a7;
+        }
+
+        .typing-dots span {
+            animation: blink 1.4s infinite;
+            opacity: 0;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .send-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .send-icon:hover {
+            transform: scale(1.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Chat container -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <img src="Untitled design.png" alt="Chatbot Logo"> <!-- Replace with your logo -->
+            LA TULIPE NOIR
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Welcome tip -->
+            <div class="message-container">
+                <div class="bot-image"></div>
+                <div class="message bot-message">
+                    Welcome to LA TULIPE NOIR! How can I assist you today?
+                </div>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <span class="send-icon" onclick="sendMessage()">
+                <svg style="color: white;" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m22 2-7 20-4-9-9-4Z"></path>
+                    <path d="M22 2 11 13"></path>
+                </svg>
+            </span>
+        </div>
+    </div>
+
+    <script>
+      const DEEPSEEK_API_KEY = 'sk-c443eb7767b14ab18d8e955a1978787a'; // Replace with your DeepSeek API key
+      const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Replace with the actual API endpoint
+  
+      // Embedded file content (you can replace this with your own text)
+      const embeddedFileContent = `
+      Welcome to LA TULIPE NOIR! How can I assist you today?
+      `;
+  
+      let knowledgeBase = embeddedFileContent; // Initialize knowledge base with embedded file content
+  
+      // Send user message and get bot response
+      async function sendMessage() {
+          const userInput = document.getElementById('user-input');
+          const message = userInput.value.trim();
+          
+          if (!message) return;
+  
+          // Clear input
+          userInput.value = '';
+  
+          // Add user message
+          addMessage('user', message);
+  
+          // Wait 2 seconds before showing typing dots
+          setTimeout(async () => {
+              // Add typing dots in the bot's message area
+              const typingDots = document.createElement('div');
+              typingDots.classList.add('message', 'bot-message');
+              typingDots.innerHTML = `
+                  <div class="typing-dots">
+                      <span>.</span><span>.</span><span>.</span>
+                  </div>
+              `;
+              document.getElementById('chat-messages').appendChild(typingDots);
+  
+              // Scroll to bottom
+              document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+  
+              try {
+                  // Combine user message with knowledge base
+                  const prompt = `Knowledge Base:\n${knowledgeBase}\n\nUser: ${message}\nAI:`;
+  
+                  const response = await fetch(DEEPSEEK_API_URL, {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                      },
+                      body: JSON.stringify({
+                          model: "deepseek-chat", // Replace with the correct model name
+                          messages: [
+                              {"role": "user", "content": prompt}
+                          ],
+                          max_tokens: 150
+                      })
+                  });
+  
+                  if (!response.ok) {
+                      throw new Error(`HTTP error! Status: ${response.status}`);
+                  }
+  
+                  const data = await response.json();
+                  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                      throw new Error('Invalid API response format');
+                  }
+  
+                  const botResponse = data.choices[0].message.content;
+  
+                  // Remove typing dots
+                  typingDots.remove();
+  
+                  // Add bot response with letter-by-letter typing effect
+                  typeMessage('bot', botResponse);
+              } catch (error) {
+                  console.error('Error:', error);
+                  // Remove typing dots
+                  typingDots.remove();
+                  addMessage('bot', `Sorry, something went wrong: ${error.message}`);
+              }
+          }, 1000); // Wait 2 seconds before showing typing dots
+      }
+  
+      // Add message to chat window
+      function addMessage(sender, text) {
+          const messagesDiv = document.getElementById('chat-messages');
+          const messageContainer = document.createElement('div');
+          messageContainer.classList.add('message-container');
+  
+          if (sender === 'bot') {
+              const botImage = document.createElement('div');
+              botImage.classList.add('bot-image');
+              messageContainer.appendChild(botImage);
+          }
+  
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+          messageElement.textContent = text;
+          messageContainer.appendChild(messageElement);
+  
+          messagesDiv.appendChild(messageContainer);
+          
+          // Scroll to bottom
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+  
+      // Type message letter by letter
+      function typeMessage(sender, text) {
+          const messagesDiv = document.getElementById('chat-messages');
+          const messageContainer = document.createElement('div');
+          messageContainer.classList.add('message-container');
+  
+          if (sender === 'bot') {
+              const botImage = document.createElement('div');
+              botImage.classList.add('bot-image');
+              messageContainer.appendChild(botImage);
+          }
+  
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+          messagesDiv.appendChild(messageContainer);
+          messageContainer.appendChild(messageElement);
+  
+          let index = 0;
+          const typingSpeed = 50; // Adjust typing speed (in milliseconds)
+  
+          function typeNextLetter() {
+              if (index < text.length) {
+                  messageElement.textContent += text[index];
+                  index++;
+                  setTimeout(typeNextLetter, typingSpeed);
+              } else {
+                  // Scroll to bottom after typing is done
+                  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+              }
+          }
+  
+          typeNextLetter();
+      }
+  
+      // Handle Enter key
+      document.getElementById('user-input').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+              sendMessage();
+          }
+      });
+  </script>
+</body>
+</html>
